@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>[Log-in] Money Comb - The Money Helping Bee</title>
+    <link rel="icon" type="image/x-icon" href="static/assets/img/bee.jpg" />
+    <!-- Font Awesome icons (free version)-->
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <!-- Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,800,800i" rel="stylesheet" type="text/css" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link rel= "stylesheet" type= "text/css" href="{{ url_for('static',filename='css/styles.css') }}"/>
+</head>
+<body>
+
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="sideNav">
+            <a class="navbar-brand js-scroll-trigger" href="{{ url_for('navigation') }}">
+                <span class="d-block d-lg-none">Money Comb</span>
+                <span class="d-none d-lg-block"><img class="img-fluid img-profile rounded-circle mx-auto mb-2" src="static/assets/img/bee.jpg" alt="..." /></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ url_for('main_page') }}">Record Expenses</a></li>
+                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ url_for('allowances_page') }}">Record Daily Allowance</a></li>
+                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ url_for('show_monthly_records') }}">View Monthly Records</a></li>
+                </ul>
+            </div>
+        </nav>
+    <section class="resume-section section-container">    
+    <div class="login">
+    <h1>Record Expense</h1>
+    <label for="expenseDate">Date:</label>
+    <input type="date" id="expenseDate" required>
+    <label for="expenseAmount">Amount:</label>
+    <input type="number" id="expenseAmount" required>
+    <label for="expenseDetails">Details:</label>
+    <input type="text" id="expenseDetails" required>
+    <button onclick="recordExpense()">Record Expense</button>
+    </div>
+    </section>
+    <script>
+    function recordExpense() {
+        const date = document.getElementById('expenseDate').value;
+        const amount = document.getElementById('expenseAmount').value;
+        const details = document.getElementById('expenseDetails').value;
+
+        if (!date) {
+            alert('Please enter a date for the expense.');
+            return;
+        }
+
+        fetch('/record_expense', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ date, amount, details })
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Expense Successfully Recorded');
+                document.getElementById('expenseDate').value = '';
+                document.getElementById('expenseAmount').value = '';
+                document.getElementById('expenseDetails').value = '';
+            } else {
+                alert('Failed to record expense. Please try again.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+        function recordSaving() {
+            const date = document.getElementById('savingDate').value;
+            const amount = document.getElementById('savingAmount').value;
+            const details = document.getElementById('savingDetails').value;
+
+            if (!date) {
+                alert('Please enter a date for the savings.');
+                return;
+            }
+
+            fetch('/record_savings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ date, amount, details })
+            })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+        }
+
+        function computeBalance() {
+            const totalMoney = document.getElementById('totalMoney').value;
+
+            if (!totalMoney) {
+                alert('Please enter the total money.');
+                return;
+            }
+
+            fetch('/compute_balance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ total_money: totalMoney })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('remainingBalance').textContent = `Remaining Balance: $${data.remaining_balance}`;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function recordAllowance() {
+            const date = document.getElementById('allowanceDate').value;
+            const amount = document.getElementById('allowanceAmount').value;
+
+            fetch('/record_allowance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ date, amount })
+            })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>[Log-in] Money Comb - The Money Helping Bee</title>
+        <link rel="icon" type="image/x-icon" href="static/assets/img/bee.jpg" />
+        <!-- Font Awesome icons (free version)-->
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <!-- Google fonts-->
+        <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700" rel="stylesheet" type="text/css" />
+        <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,800,800i" rel="stylesheet" type="text/css" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link rel= "stylesheet" type= "text/css" href="{{ url_for('static',filename='css/styles.css') }}"/>
+    </head>
+<body>
+    <!-- Navigation-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="sideNav">
+    <a class="navbar-brand js-scroll-trigger" href="{{ url_for('navigation') }}">
+        <span class="d-block d-lg-none">Money Comb</span>
+        <span class="d-none d-lg-block"><img class="img-fluid img-profile rounded-circle mx-auto mb-2" src="static/assets/img/bee.jpg" alt="..." /></span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav">
+            <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ url_for('main_page') }}">Record Expenses</a></li>
+            <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ url_for('allowances_page') }}">Record Daily Allowance</a></li>
+            <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ url_for('show_monthly_records') }}">View Monthly Records</a></li>
+        </ul>
+    </div>
+</nav>
+<section class="resume-section section-container">
+    <div class="login">
+    <h1>Monthly Records</h1>
+    
+    <!-- Form to select a month and filter expenses -->
+    <form id="monthlyRecordsForm" method="post">
+        <label for="selected_month">Select Month:</label>
+        <input type="month" id="selected_month" name="selected_month" required>
+        <button type="submit">Filter</button>
+    </form>
+    <!-- Display selected month -->
+    {% if selected_month %}
+    <h2>Selected Month: {{ selected_month.strftime('%B %Y') }}</h2>
+    {% endif %}
+    
+    <!-- Display monthly savings -->
+    {% if monthly_savings is not none %}
+    <h2>Monthly Savings: {{ monthly_savings }}</h2>
+    {% endif %}
+    </div>
+    <div class="showtable">
+    <!-- Display expenses table if expenses is not None -->
+    {% if expenses is not none %}
+        {% if not expenses.empty %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, expense in expenses.iterrows() %}
+                <tr>
+                    <td>{{ expense['Date'] }}</td>
+                    <td>{{ expense['Amount'] }}</td>
+                    <td>{{ expense['Details'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No records found for the selected month.</p>
+        {% endif %}
+    {% else %}
+    <p> </p>
+    {% endif %}
+    </div>
+</section>
+    <!-- Home button to redirect to index.html -->
+
+    <script>
+        // Function to calculate monthly savings
+        function calculateMonthlySavings() {
+            const selectedMonth = document.getElementById('selected_month').value;
+
+            fetch('/calculate_savings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ selected_month: selectedMonth })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('monthlySavings').innerHTML = `<h2>Monthly Savings: ${data.savings}</h2>`;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Call the function when the page loads
+        window.onload = function() {
+            calculateMonthlySavings();
+        };
+    </script>
+</body>
+</html>
